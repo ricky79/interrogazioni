@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Nuova materia{% endblock %}
+{% block content %}
+<h1>Configura le interrogazioni</h1>
+<form method="post" class="form">
+  <label>Nome della materia
+    <input name="nome" value="{{ form.nome }}" required placeholder="es. Storia">
+  </label>
+
+  <fieldset>
+    <legend>Date delle interrogazioni</legend>
+    <div id="date">
+      {% for d in date_inserite %}
+        <div class="riga-data">
+          <input type="date" name="date" value="{{ d }}">
+          <button type="button" class="rimuovi" title="Rimuovi">✕</button>
+        </div>
+      {% endfor %}
+    </div>
+    <button type="button" id="aggiungi-data" class="btn secondario">+ Aggiungi data</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>Compagni di classe</legend>
+    <label>Numero di studenti
+      <input type="number" name="numero" min="1" max="200" value="{{ form.numero }}" placeholder="es. 24">
+    </label>
+    <label>Nomi (facoltativo, uno per riga — se compilato sostituisce il numero)
+      <textarea name="nomi" rows="8" placeholder="Mario Rossi&#10;Giulia Bianchi&#10;...">{{ form.nomi }}</textarea>
+    </label>
+  </fieldset>
+
+  <button type="submit" class="btn">🎲 Genera calendario</button>
+</form>
+
+<script>
+  const contenitore = document.getElementById("date");
+  document.getElementById("aggiungi-data").addEventListener("click", () => {
+    const righe = contenitore.querySelectorAll(".riga-data");
+    const nuova = righe[righe.length - 1].cloneNode(true);
+    const ultima = righe[righe.length - 1].querySelector("input").value;
+    const input = nuova.querySelector("input");
+    input.value = "";
+    if (ultima) {  // proponi il giorno successivo all'ultima data inserita
+      const d = new Date(ultima);
+      d.setUTCDate(d.getUTCDate() + 1);
+      input.value = d.toISOString().slice(0, 10);
+    }
+    contenitore.appendChild(nuova);
+  });
+  contenitore.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("rimuovi")) return;
+    const righe = contenitore.querySelectorAll(".riga-data");
+    if (righe.length > 1) e.target.parentElement.remove();
+    else righe[0].querySelector("input").value = "";
+  });
+</script>
+{% endblock %}

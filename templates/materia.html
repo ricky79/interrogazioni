@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ materia.nome }}{% endblock %}
+{% block content %}
+<h1>{{ materia.nome }}</h1>
+<div class="azioni">
+  <form method="post" action="{{ url_for('rigenera', materia_id=materia.id) }}"
+        onsubmit="return confirm('Rifare l\'estrazione? Il calendario attuale verrà sostituito.')">
+    <button class="btn">🎲 Rifai estrazione</button>
+  </form>
+  <a class="btn secondario" href="{{ url_for('esporta_csv', materia_id=materia.id) }}">⬇ Esporta CSV</a>
+  <button class="btn secondario" onclick="window.print()">🖨 Stampa</button>
+  <form method="post" action="{{ url_for('elimina', materia_id=materia.id) }}"
+        onsubmit="return confirm('Eliminare definitivamente questa materia?')">
+    <button class="btn pericolo">Elimina</button>
+  </form>
+</div>
+
+<div class="calendario">
+{% for giorno, studenti in calendario %}
+  <section class="giorno {% if giorno < oggi %}passato{% elif giorno == oggi %}oggi{% endif %}">
+    <h2>{{ giorno|data_it }} <span class="badge">{{ studenti|length }}</span></h2>
+    {% if studenti %}
+      <ol>{% for s in studenti %}<li>{{ s }}</li>{% endfor %}</ol>
+    {% else %}
+      <p class="muted">Nessuno</p>
+    {% endif %}
+  </section>
+{% endfor %}
+</div>
+{% endblock %}
