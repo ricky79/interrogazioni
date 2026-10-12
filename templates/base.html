@@ -8,8 +8,19 @@
 </head>
 <body>
   <header>
-    <a href="{{ url_for('index') }}" class="logo">📚 Interrogazioni</a>
-    <a href="{{ url_for('nuova_materia') }}" class="btn">+ Nuova materia</a>
+    {% block logo %}<a href="{{ url_for('index') }}" class="logo">📚 Interrogazioni</a>{% endblock %}
+    <nav>
+      {% if g.utente %}
+        <span class="muted">👤 {{ g.utente.username }}</span>
+        <form method="post" action="{{ url_for('auth.esci') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn secondario">Esci</button>
+        </form>
+      {% elif not pubblica %}
+        <a href="{{ url_for('auth.accedi') }}" class="btn secondario">Accedi</a>
+        <a href="{{ url_for('auth.registrati') }}" class="btn">Registrati</a>
+      {% endif %}
+    </nav>
   </header>
   <main>
     {% for categoria, msg in get_flashed_messages(with_categories=true) %}

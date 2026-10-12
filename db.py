@@ -3,8 +3,28 @@ import sqlite3
 from flask import current_app, g
 
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS utenti (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    password_hash TEXT NOT NULL,
+    creato_il TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS classi (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    utente_id INTEGER NOT NULL UNIQUE REFERENCES utenti(id) ON DELETE CASCADE,
+    nome TEXT NOT NULL,
+    token_invito TEXT NOT NULL UNIQUE,
+    creata_il TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS alunni (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    classe_id INTEGER NOT NULL REFERENCES classi(id) ON DELETE CASCADE,
+    nome TEXT NOT NULL,
+    posizione INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS materie (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    classe_id INTEGER NOT NULL REFERENCES classi(id) ON DELETE CASCADE,
     nome TEXT NOT NULL,
     creata_il TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -14,12 +34,12 @@ CREATE TABLE IF NOT EXISTS date_interrogazione (
     giorno TEXT NOT NULL,
     UNIQUE (materia_id, giorno)
 );
-CREATE TABLE IF NOT EXISTS studenti (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE IF NOT EXISTS assegnazioni (
     materia_id INTEGER NOT NULL REFERENCES materie(id) ON DELETE CASCADE,
-    nome TEXT NOT NULL,
-    data_id INTEGER REFERENCES date_interrogazione(id) ON DELETE SET NULL,
-    ordine INTEGER
+    alunno_id INTEGER NOT NULL REFERENCES alunni(id) ON DELETE CASCADE,
+    data_id INTEGER NOT NULL REFERENCES date_interrogazione(id) ON DELETE CASCADE,
+    ordine INTEGER NOT NULL,
+    PRIMARY KEY (materia_id, alunno_id)
 );
 """
 

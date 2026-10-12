@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ classe.nome }}{% endblock %}
+{% block content %}
+<h1>{{ classe.nome }}</h1>
+
+<section class="box">
+  <h2>🔗 Link di invito per i compagni</h2>
+  <p class="muted">Chi ha questo link vede i calendari in sola lettura, senza registrarsi.</p>
+  <div class="invito">
+    <input id="link" value="{{ link_invito }}" readonly>
+    <button type="button" class="btn" onclick="navigator.clipboard.writeText(document.getElementById('link').value); this.textContent='Copiato!'">Copia</button>
+  </div>
+  <div class="azioni">
+    <a class="btn secondario" href="{{ link_invito }}" target="_blank">Vedi come i compagni</a>
+    <form method="post" action="{{ url_for('rigenera_invito') }}"
+          onsubmit="return confirm('Il link attuale smetterà di funzionare. Continuare?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn secondario">Genera nuovo link</button>
+    </form>
+  </div>
+</section>
+
+<div class="titolo-sezione">
+  <h2>Materie</h2>
+  <a class="btn" href="{{ url_for('nuova_materia') }}">+ Nuova materia</a>
+</div>
+{% if materie %}
+  <div class="griglia">
+  {% for m in materie %}
+    <a class="card" href="{{ url_for('materia', materia_id=m.id) }}">
+      <h3>{{ m.nome }}</h3>
+      <p>{{ m.n_date }} date</p>
+      {% if m.prima %}<p class="muted">dal {{ m.prima|data_it }}<br>al {{ m.ultima|data_it }}</p>{% endif %}
+    </a>
+  {% endfor %}
+  </div>
+{% else %}
+  <p class="muted">Nessuna materia ancora.</p>
+{% endif %}
+
+<section class="box" id="alunni">
+  <h2>👥 Alunni ({{ alunni|length }})</h2>
+  <form method="post" action="{{ url_for('modifica_alunni') }}" class="form largo">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="elenco-alunni">
+      {% for a in alunni %}
+        <div class="riga-alunno">
+          <span class="muted">{{ loop.index }}.</span>
+          <input name="nome_{{ a.id }}" value="{{ a.nome }}" maxlength="80" aria-label="Nome alunno {{ loop.index }}">
+          <label class="elimina" title="Rimuovi alunno"><input type="checkbox" name="elimina" value="{{ a.id }}"> rimuovi</label>
+        </div>
+      {% endfor %}
+    </div>
+    <label>Aggiungi alunni (uno per riga)
+      <textarea name="nomi" rows="3"></textarea>
+    </label>
+    <p class="muted">I nomi modificati si aggiornano subito in tutti i calendari. Chi viene aggiunto entra in una materia solo dopo "Rifai estrazione".</p>
+    <button class="btn">Salva alunni</button>
+  </form>
+</section>
+
+<section class="box pericolo-box">
+  <h2>Zona pericolosa</h2>
+  <form method="post" action="{{ url_for('elimina_classe') }}"
+        onsubmit="return confirm('Eliminare la classe con tutti gli alunni, le materie e i calendari?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn pericolo">Elimina classe</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ classe.nome }}{% endblock %}
+{% block logo %}<a href="{{ url_for('pubblica', token=classe.token_invito) }}" class="logo">📚 {{ classe.nome }}</a>{% endblock %}
+{% block content %}
+<h1>Interrogazioni – {{ classe.nome }}</h1>
+
+<section class="box">
+  <h2>🔎 Quando tocca a me?</h2>
+  <form method="get" class="invito">
+    <select name="alunno" onchange="this.form.submit()" aria-label="Il tuo nome">
+      <option value="">Scegli il tuo nome…</option>
+      {% for a in alunni %}<option value="{{ a.id }}" {% if a.id == scelto %}selected{% endif %}>{{ a.nome }}</option>{% endfor %}
+    </select>
+    <noscript><button class="btn">Mostra</button></noscript>
+  </form>
+  {% if mie is not none %}
+    {% if mie %}
+      <ul class="mie">
+        {% for r in mie %}
+          <li class="{% if r.giorno < oggi %}passato{% endif %}"><strong>{{ r.giorno|data_it }}</strong> – {{ r.materia }} <span class="muted">({{ r.ordine }}º)</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">Nessuna interrogazione assegnata.</p>
+    {% endif %}
+  {% endif %}
+</section>
+
+<h2>Materie</h2>
+{% if materie %}
+  <div class="griglia">
+  {% for m in materie %}
+    <a class="card" href="{{ url_for('materia_pubblica', token=classe.token_invito, materia_id=m.id) }}">
+      <h3>{{ m.nome }}</h3>
+      {% if m.prima %}<p class="muted">dal {{ m.prima|data_it }}<br>al {{ m.ultima|data_it }}</p>{% endif %}
+    </a>
+  {% endfor %}
+  </div>
+{% else %}
+  <p class="muted">Il rappresentante non ha ancora creato nessun calendario.</p>
+{% endif %}
+{% endblock %}

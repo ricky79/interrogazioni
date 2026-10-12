@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Nuova materia{% endblock %}
 {% block content %}
-<h1>Configura le interrogazioni</h1>
+<p><a href="{{ url_for('classe') }}">← Torna alla classe</a></p>
+<h1>Nuova materia</h1>
 <form method="post" class="form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label>Nome della materia
     <input name="nome" value="{{ form.nome }}" required placeholder="es. Storia">
   </label>
@@ -20,15 +22,7 @@
     <button type="button" id="aggiungi-data" class="btn secondario">+ Aggiungi data</button>
   </fieldset>
 
-  <fieldset>
-    <legend>Compagni di classe</legend>
-    <label>Numero di studenti
-      <input type="number" name="numero" min="1" max="200" value="{{ form.numero }}" placeholder="es. 24">
-    </label>
-    <label>Nomi (facoltativo, uno per riga — se compilato sostituisce il numero)
-      <textarea name="nomi" rows="8" placeholder="Mario Rossi&#10;Giulia Bianchi&#10;...">{{ form.nomi }}</textarea>
-    </label>
-  </fieldset>
+  <p class="muted">Gli alunni della classe ({{ n_alunni }}) verranno distribuiti a sorte sulle date.</p>
 
   <button type="submit" class="btn">🎲 Genera calendario</button>
 </form>

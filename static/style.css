@@ -30,3 +30,21 @@ fieldset { border: 1px solid var(--bordo); border-radius: 8px; display: flex; fl
 .azioni { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .azioni form { margin: 0; }
 @media print { header, .azioni, .flash { display: none; } .giorno { break-inside: avoid; } }
+header nav { display: flex; align-items: center; gap: 8px; }
+header nav form { margin: 0; }
+h3 { margin: 0 0 8px; font-size: 1.05rem; }
+.hero { max-width: 640px; padding: 32px 0; font-size: 1.1rem; }
+.box { background: #fff; border: 1px solid var(--bordo); border-radius: 12px; padding: 16px; margin: 24px 0; }
+.box h2 { margin-top: 0; font-size: 1.15rem; }
+.pericolo-box { border-color: #fecaca; }
+.titolo-sezione { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.invito { display: flex; gap: 8px; margin-bottom: 12px; }
+.invito input, .invito select { flex: 1; min-width: 0; font: inherit; padding: 8px; border: 1px solid var(--bordo); border-radius: 6px; }
+.form.largo { max-width: none; }
+.elenco-alunni { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 6px 16px; }
+.riga-alunno { display: flex; align-items: center; gap: 8px; }
+.riga-alunno input[type=text], .riga-alunno input:not([type]) { flex: 1; min-width: 0; }
+.form .elimina { flex-direction: row; align-items: center; font-size: .85rem; color: var(--muted); white-space: nowrap; }
+.mie { padding-left: 20px; margin: 0; }
+.mie li { margin: 4px 0; }
+.mie li.passato { opacity: .55; }
