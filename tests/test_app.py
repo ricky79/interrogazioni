@@ -161,3 +161,26 @@ def test_csv_ed_eliminazioni(app):
     assert c.get(url).status_code == 404
     post(c, "/classe/elimina")
     assert c.get("/classe").headers["Location"].endswith("/classe/nuova")
+
+
+def test_materie_diverse_senza_doppioni_stesso_giorno(app):
+    c = rappresentante(app)
+    storia = c.get(crea_materia(c, "Storia")).get_data(as_text=True)
+    mate = c.get(crea_materia(c, "Matematica")).get_data(as_text=True)
+
+    def per_giorno(pagina):
+        sezioni = re.findall(r'<h2>(\w+ \d+ \w+ \d+) .*?</h2>\s*<ol>(.*?)</ol>', pagina, re.S)
+        return {g: set(re.findall(r"<li>(.*?)</li>", lista)) for g, lista in sezioni}
+
+    s, m = per_giorno(storia), per_giorno(mate)
+    assert s.keys() == m.keys() and len(s) == 2
+    for giorno in s:
+        assert not s[giorno] & m[giorno]
+    assert "interrogazioni doppie" not in mate
+
+
+def test_avviso_doppioni_inevitabili(app):
+    c = rappresentante(app)
+    post(c, "/classe/materie/nuova", nome="Storia", date=["2026-11-03"])
+    r = post(c, "/classe/materie/nuova", nome="Inglese", date=["2026-11-03"])
+    assert "interrogazioni doppie" in c.get(r.headers["Location"]).get_data(as_text=True)

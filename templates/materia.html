@@ -26,6 +26,14 @@
   {% endif %}
 </div>
 
+{% if admin and sovrapposizioni %}
+  <div class="flash errore">
+    ⚠️ Con queste date non è stato possibile evitare tutte le interrogazioni doppie nello stesso giorno:
+    <ul>{% for r in sovrapposizioni %}<li>{{ r.nome }} – {{ r.giorno|data_it }} (anche {{ r.altra_materia }})</li>{% endfor %}</ul>
+    Aggiungi qualche data o usa "Rifai estrazione" dopo aver modificato le altre materie.
+  </div>
+{% endif %}
+
 {% if admin and non_assegnati %}
   <div class="flash errore">Non ancora assegnati: {{ non_assegnati|map(attribute='nome')|join(', ') }}. Usa "Rifai estrazione" per includerli.</div>
 {% endif %}

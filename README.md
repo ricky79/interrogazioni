@@ -12,6 +12,13 @@ gli alunni sulle date in modo equilibrato.
   seguito; i nomi si possono modificare, aggiungere o rimuovere in qualsiasi momento
 - **Materie** con le relative date: gli alunni della classe vengono estratti a sorte in
   modo equilibrato (differenza massima di 1 persona tra le date), con l'ordine del giorno
+- **Estrazione coordinata tra le materie**: l'algoritmo tiene conto delle interrogazioni
+  già fissate nelle altre materie, con queste regole in ordine di importanza:
+  1. mai due interrogazioni nello stesso giorno (se le date lo permettono; altrimenti
+     il rappresentante vede un avviso con i casi rimasti)
+  2. chi è già uscito il primo giorno in un'altra materia non è di nuovo il primo
+  3. chi è stato interrogato presto nelle altre materie va più avanti, e viceversa
+  4. se possibile, niente interrogazioni in giorni consecutivi
 - **Link di invito** per i compagni: vedono i calendari in sola lettura senza registrarsi,
   e con "Quando tocca a me?" trovano subito le proprie date. Il link si può rigenerare
   per invalidare quello vecchio
@@ -60,7 +67,7 @@ a mano con `flask --app app pulizia`.
 
 | File | Contenuto |
 |------|-----------|
-| `scheduler.py` | algoritmo di distribuzione casuale (puro, testabile) |
+| `scheduler.py` | algoritmo di distribuzione: estrazione casuale + ricerca locale sulle regole tra materie |
 | `app.py` | route Flask: area rappresentante, vista pubblica, validazione |
 | `auth.py` | registrazione, login, eliminazione account, protezione CSRF |
 | `privacy.py` | PIN, intestazioni anti-indicizzazione, cancellazione automatica, informativa |

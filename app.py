@@ -14,7 +14,7 @@ import privacy
 from auth import login_required
 from db import get_db, init_db
 from privacy import richiedi_pin, scadenza_anno_scolastico
-from scheduler import distribuisci, parse_date
+from scheduler import Impegno, distribuisci, parse_date, posizioni_relative
 
 MAX_ALUNNI = 200
 
@@ -355,19 +355,57 @@ def salva_materia(classe_id, nome, giorni):
 
 
 def assegna(materia_id):
-    """(Ri)estrae a sorte l'assegnazione alunni → date per una materia."""
+    """(Ri)estrae a sorte l'assegnazione alunni → date per una materia,
+    tenendo conto delle interrogazioni già fissate nelle altre materie."""
     db = get_db()
-    date_ids = {r["giorno"]: r["id"] for r in db.execute(
+    date_ids = {date.fromisoformat(r["giorno"]): r["id"] for r in db.execute(
         "SELECT id, giorno FROM date_interrogazione WHERE materia_id = ?", (materia_id,))}
     alunni = [r["id"] for r in db.execute(
         "SELECT a.id FROM alunni a JOIN materie m ON m.classe_id = a.classe_id WHERE m.id = ?",
         (materia_id,))]
-    piano = distribuisci(alunni, list(date_ids))
+    piano = distribuisci(alunni, list(date_ids), impegni=impegni_altre_materie(materia_id))
     db.execute("DELETE FROM assegnazioni WHERE materia_id = ?", (materia_id,))
     db.executemany("INSERT INTO assegnazioni (materia_id, alunno_id, data_id, ordine) VALUES (?, ?, ?, ?)",
                    [(materia_id, a, date_ids[giorno], i)
                     for giorno, ids in piano.items()
                     for i, a in enumerate(ids, 1)])
+
+
+def impegni_altre_materie(materia_id):
+    """{alunno_id: [Impegno, ...]} con le interrogazioni nelle altre materie della classe."""
+    righe = get_db().execute("""
+        SELECT a.alunno_id, a.materia_id, d.giorno,
+               (SELECT COUNT(*) FROM date_interrogazione d2
+                 WHERE d2.materia_id = d.materia_id AND d2.giorno < d.giorno) AS indice,
+               (SELECT COUNT(*) FROM date_interrogazione d3
+                 WHERE d3.materia_id = d.materia_id) AS n_date
+        FROM assegnazioni a
+        JOIN date_interrogazione d ON d.id = a.data_id
+        WHERE a.materia_id IN (SELECT id FROM materie WHERE classe_id =
+                                 (SELECT classe_id FROM materie WHERE id = ?))
+          AND a.materia_id != ?
+    """, (materia_id, materia_id)).fetchall()
+    impegni = {}
+    for r in righe:
+        posizione = posizioni_relative(r["n_date"])[r["indice"]]
+        impegni.setdefault(r["alunno_id"], []).append(
+            Impegno(date.fromisoformat(r["giorno"]), posizione))
+    return impegni
+
+
+def sovrapposizioni(materia_id):
+    """Alunni che in una data di questa materia hanno già un'altra interrogazione."""
+    return get_db().execute("""
+        SELECT al.nome, d.giorno, m2.nome AS altra_materia
+        FROM assegnazioni a
+        JOIN date_interrogazione d ON d.id = a.data_id
+        JOIN alunni al ON al.id = a.alunno_id
+        JOIN assegnazioni a2 ON a2.alunno_id = a.alunno_id AND a2.materia_id != a.materia_id
+        JOIN date_interrogazione d2 ON d2.id = a2.data_id AND d2.giorno = d.giorno
+        JOIN materie m2 ON m2.id = a2.materia_id
+        WHERE a.materia_id = ?
+        ORDER BY d.giorno, al.nome
+    """, (materia_id,)).fetchall()
 
 
 def carica_calendario(materia_id):
@@ -395,6 +433,7 @@ def mostra_materia(m, admin):
     return render_template("materia.html", materia=m, admin=admin, pubblica=not admin,
                            calendario=carica_calendario(m["id"]),
                            non_assegnati=non_assegnati(m["id"]),
+                           sovrapposizioni=sovrapposizioni(m["id"]),
                            oggi=date.today().isoformat())
 
 
