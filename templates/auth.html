@@ -16,6 +16,9 @@
   <label>Conferma password
     <input type="password" name="conferma" required minlength="8" autocomplete="new-password">
   </label>
+  <label class="check"><input type="checkbox" name="eta" required> Ho almeno 14 anni</label>
+  <label class="check"><input type="checkbox" name="privacy" required>
+    <span>Ho letto l'<a href="{{ url_for('privacy.informativa') }}" target="_blank">informativa privacy</a> e la accetto</span></label>
   {% endif %}
   <button class="btn">{{ "Registrati" if registrazione else "Accedi" }}</button>
   {% if registrazione %}

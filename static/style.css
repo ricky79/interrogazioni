@@ -48,3 +48,12 @@ h3 { margin: 0 0 8px; font-size: 1.05rem; }
 .mie { padding-left: 20px; margin: 0; }
 .mie li { margin: 4px 0; }
 .mie li.passato { opacity: .55; }
+footer { text-align: center; padding: 24px 16px 32px; font-size: .9rem; }
+footer a { color: var(--muted); }
+.form .check { flex-direction: row; align-items: flex-start; gap: 8px; }
+.form .check input { margin-top: 4px; }
+.suggerimento { background: #eff6ff; border-radius: 8px; padding: 8px 12px; margin: 0; }
+.abbrevia { align-self: flex-start; }
+#pin form { margin-bottom: 8px; }
+.testo { max-width: 720px; line-height: 1.55; }
+.testo h2 { font-size: 1.15rem; margin-top: 28px; }

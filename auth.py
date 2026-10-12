@@ -4,6 +4,7 @@ import functools
 import hmac
 import secrets
 import sqlite3
+from datetime import date
 
 from flask import (Blueprint, abort, flash, g, redirect, render_template,
                    request, session, url_for)
@@ -21,8 +22,13 @@ def carica_utente():
     uid = session.get("utente_id")
     g.utente = None
     if uid is not None:
-        g.utente = get_db().execute(
-            "SELECT id, username FROM utenti WHERE id = ?", (uid,)).fetchone()
+        db = get_db()
+        g.utente = db.execute(
+            "SELECT id, username, ultimo_accesso FROM utenti WHERE id = ?", (uid,)).fetchone()
+        oggi = date.today().isoformat()
+        if g.utente and g.utente["ultimo_accesso"] != oggi:
+            db.execute("UPDATE utenti SET ultimo_accesso = ? WHERE id = ?", (oggi, uid))
+            db.commit()
 
 
 @bp.before_app_request
@@ -71,11 +77,16 @@ def registrati():
             errori.append(f"La password deve avere almeno {MIN_PASSWORD} caratteri.")
         if password != request.form.get("conferma", ""):
             errori.append("Le due password non coincidono.")
+        if not request.form.get("eta"):
+            errori.append("Per registrarti devi avere almeno 14 anni.")
+        if not request.form.get("privacy"):
+            errori.append("Devi accettare l'informativa privacy.")
         if not errori:
             db = get_db()
             try:
                 uid = db.execute(
-                    "INSERT INTO utenti (username, password_hash) VALUES (?, ?)",
+                    "INSERT INTO utenti (username, password_hash, privacy_accettata_il) "
+                    "VALUES (?, ?, datetime('now'))",
                     (username, generate_password_hash(password))).lastrowid
                 db.commit()
             except sqlite3.IntegrityError:
@@ -106,3 +117,20 @@ def accedi():
 def esci():
     session.clear()
     return redirect(url_for("index"))
+
+
+@bp.route("/account", methods=["GET", "POST"])
+@login_required
+def account():
+    if request.method == "POST":
+        db = get_db()
+        hash_ = db.execute("SELECT password_hash FROM utenti WHERE id = ?",
+                           (g.utente["id"],)).fetchone()["password_hash"]
+        if check_password_hash(hash_, request.form.get("password", "")):
+            db.execute("DELETE FROM utenti WHERE id = ?", (g.utente["id"],))
+            db.commit()
+            session.clear()
+            flash("Account e dati della classe cancellati definitivamente.")
+            return redirect(url_for("index"))
+        flash("Password errata: account non eliminato.", "errore")
+    return render_template("account.html")

@@ -18,6 +18,18 @@ gli alunni sulle date in modo equilibrato.
 - "Rifai estrazione", esportazione CSV (apribile in Excel), stampa
 - Password salvate come hash, protezione CSRF sui form
 
+## Privacy
+
+- Suggerimento e pulsante per usare **nome e iniziale del cognome** ("Anna B.")
+- **PIN della classe** facoltativo, richiesto oltre al link di invito (bloccato per 15 minuti
+  dopo 10 tentativi errati)
+- Pagine delle classi escluse dai motori di ricerca (`X-Robots-Tag`, `robots.txt`) e
+  `Referrer-Policy: no-referrer`, così il link non trapela verso altri siti
+- Registrazione con conferma di **almeno 14 anni** e accettazione dell'**informativa** (`/privacy`)
+- **Eliminazione dell'account** con cancellazione di tutti i dati
+- **Cancellazione automatica** delle classi il 31 agosto e degli account inattivi da oltre un anno
+- Solo il cookie tecnico di sessione: nessun banner cookie necessario
+
 ## Avvio
 
 ```bash
@@ -26,7 +38,17 @@ python3 -m venv .venv
 .venv/bin/python app.py          # http://127.0.0.1:5000
 ```
 
-In produzione imposta la variabile d'ambiente `SECRET_KEY` con una stringa lunga e casuale.
+In produzione imposta queste variabili d'ambiente:
+
+| Variabile | Contenuto |
+|-----------|-----------|
+| `SECRET_KEY` | stringa lunga e casuale |
+| `TITOLARE_NOME` | chi gestisce il sito (mostrato nell'informativa) |
+| `TITOLARE_EMAIL` | email per le richieste privacy |
+| `HOSTING` | fornitore e paese dei server, es. "PythonAnywhere, server in UE" |
+
+La pulizia dei dati scaduti parte da sola una volta al giorno; si può anche lanciare
+a mano con `flask --app app pulizia`.
 
 ## Test
 
@@ -40,6 +62,7 @@ In produzione imposta la variabile d'ambiente `SECRET_KEY` con una stringa lunga
 |------|-----------|
 | `scheduler.py` | algoritmo di distribuzione casuale (puro, testabile) |
 | `app.py` | route Flask: area rappresentante, vista pubblica, validazione |
-| `auth.py` | registrazione, login, protezione CSRF |
+| `auth.py` | registrazione, login, eliminazione account, protezione CSRF |
+| `privacy.py` | PIN, intestazioni anti-indicizzazione, cancellazione automatica, informativa |
 | `db.py` | schema e connessione SQLite |
 | `templates/`, `static/` | interfaccia HTML/CSS |

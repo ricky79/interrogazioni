@@ -2,6 +2,7 @@
 {% block title %}{{ classe.nome }}{% endblock %}
 {% block content %}
 <h1>{{ classe.nome }}</h1>
+<p class="muted">🗓 I dati di questa classe verranno cancellati automaticamente il {{ classe.scade_il|data_it }}.</p>
 
 <section class="box">
   <h2>🔗 Link di invito per i compagni</h2>
@@ -18,6 +19,24 @@
       <button class="btn secondario">Genera nuovo link</button>
     </form>
   </div>
+</section>
+
+<section class="box" id="pin">
+  <h2>🔑 PIN della classe {% if classe.pin_hash %}<span class="badge">attivo</span>{% endif %}</h2>
+  <p class="muted">Facoltativo. Se lo imposti, chi apre il link deve inserire anche il PIN: un link inoltrato per sbaglio da solo non basta. Comunica il PIN separatamente (es. a voce in classe).</p>
+  <form method="post" action="{{ url_for('imposta_pin') }}" class="invito">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="pin" minlength="4" maxlength="12" autocomplete="off"
+           placeholder="{{ 'Nuovo PIN' if classe.pin_hash else 'Scegli un PIN (4-12 caratteri)' }}" aria-label="PIN">
+    <button class="btn">{{ "Cambia PIN" if classe.pin_hash else "Imposta PIN" }}</button>
+  </form>
+  {% if classe.pin_hash %}
+  <form method="post" action="{{ url_for('imposta_pin') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="rimuovi" value="1">
+    <button class="btn secondario">Rimuovi PIN</button>
+  </form>
+  {% endif %}
 </section>
 
 <div class="titolo-sezione">
@@ -51,9 +70,10 @@
         </div>
       {% endfor %}
     </div>
-    <label>Aggiungi alunni (uno per riga)
+    <label>Aggiungi alunni (uno per riga, consigliato nome e iniziale: "Anna B.")
       <textarea name="nomi" rows="3"></textarea>
     </label>
+    <button type="button" class="btn secondario abbrevia" data-target="nomi">Abbrevia i cognomi di tutti</button>
     <p class="muted">I nomi modificati si aggiornano subito in tutti i calendari. Chi viene aggiunto entra in una materia solo dopo "Rifai estrazione".</p>
     <button class="btn">Salva alunni</button>
   </form>
@@ -66,5 +86,6 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button class="btn pericolo">Elimina classe</button>
   </form>
+  <p class="muted">Per cancellare anche il tuo account vai alla pagina <a href="{{ url_for('auth.account') }}">Account</a>.</p>
 </section>
 {% endblock %}

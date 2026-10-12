@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Account{% endblock %}
+{% block content %}
+<h1>Il tuo account</h1>
+<p>Nome utente: <strong>{{ g.utente.username }}</strong></p>
+
+<section class="box pericolo-box">
+  <h2>Elimina account</h2>
+  <p>Cancella definitivamente il tuo account e <strong>tutti i dati della classe</strong>: alunni, materie, calendari. Il link di invito smette di funzionare. L'operazione non si può annullare.</p>
+  <form method="post" class="form"
+        onsubmit="return confirm('Eliminare definitivamente account e classe?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Conferma con la tua password
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <button class="btn pericolo">Elimina tutto</button>
+  </form>
+</section>
+{% endblock %}

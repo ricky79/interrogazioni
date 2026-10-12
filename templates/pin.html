@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ classe.nome }}{% endblock %}
+{% block logo %}<span class="logo">📚 {{ classe.nome }}</span>{% endblock %}
+{% block content %}
+<h1>🔑 Inserisci il PIN della classe</h1>
+<p class="muted">Questi calendari sono protetti da un PIN: chiedilo al rappresentante di classe o a un compagno.</p>
+<form method="post" class="form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>PIN
+    <input name="pin" required autocomplete="off" autofocus>
+  </label>
+  <button class="btn">Entra</button>
+</form>
+{% endblock %}

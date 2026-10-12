@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS utenti (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE COLLATE NOCASE,
     password_hash TEXT NOT NULL,
+    privacy_accettata_il TEXT NOT NULL,
+    ultimo_accesso TEXT NOT NULL DEFAULT (date('now')),
     creato_il TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS classi (
@@ -14,6 +16,10 @@ CREATE TABLE IF NOT EXISTS classi (
     utente_id INTEGER NOT NULL UNIQUE REFERENCES utenti(id) ON DELETE CASCADE,
     nome TEXT NOT NULL,
     token_invito TEXT NOT NULL UNIQUE,
+    pin_hash TEXT,
+    pin_errori INTEGER NOT NULL DEFAULT 0,
+    pin_bloccato_fino TEXT,
+    scade_il TEXT NOT NULL,
     creata_il TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS alunni (

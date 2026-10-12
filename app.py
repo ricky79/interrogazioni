@@ -7,9 +7,13 @@ from datetime import date
 from flask import (Flask, Response, abort, flash, g, redirect, render_template,
                    request, url_for)
 
+from werkzeug.security import generate_password_hash
+
 import auth
+import privacy
 from auth import login_required
 from db import get_db, init_db
+from privacy import richiedi_pin, scadenza_anno_scolastico
 from scheduler import distribuisci, parse_date
 
 MAX_ALUNNI = 200
@@ -30,12 +34,17 @@ def create_app(test_config=None):
         SECRET_KEY=os.environ.get("SECRET_KEY", "dev"),
         DATABASE=os.path.join(app.instance_path, "interrogazioni.sqlite"),
         SESSION_COOKIE_SAMESITE="Lax",
+        # dati mostrati nell'informativa privacy
+        TITOLARE_NOME=os.environ.get("TITOLARE_NOME"),
+        TITOLARE_EMAIL=os.environ.get("TITOLARE_EMAIL"),
+        HOSTING=os.environ.get("HOSTING"),
     )
     if test_config:
         app.config.update(test_config)
     os.makedirs(app.instance_path, exist_ok=True)
     init_db(app)
     app.register_blueprint(auth.bp)
+    app.register_blueprint(privacy.bp)
     app.jinja_env.filters["data_it"] = formatta_data
 
     # --- Area del rappresentante -------------------------------------------
@@ -62,8 +71,9 @@ def create_app(test_config=None):
             if not errori:
                 db = get_db()
                 classe_id = db.execute(
-                    "INSERT INTO classi (utente_id, nome, token_invito) VALUES (?, ?, ?)",
-                    (g.utente["id"], nome, secrets.token_urlsafe(16))).lastrowid
+                    "INSERT INTO classi (utente_id, nome, token_invito, scade_il) VALUES (?, ?, ?, ?)",
+                    (g.utente["id"], nome, secrets.token_urlsafe(16),
+                     scadenza_anno_scolastico().isoformat())).lastrowid
                 aggiungi_alunni(classe_id, alunni)
                 db.commit()
                 flash("Classe creata! Ora aggiungi la prima materia.")
@@ -116,6 +126,25 @@ def create_app(test_config=None):
         db.commit()
         flash("Nuovo link di invito creato: quello vecchio non funziona più.")
         return redirect(url_for("classe"))
+
+    @app.post("/classe/pin")
+    @login_required
+    def imposta_pin():
+        c = classe_richiesta()
+        db = get_db()
+        if request.form.get("rimuovi"):
+            db.execute("UPDATE classi SET pin_hash = NULL WHERE id = ?", (c["id"],))
+            flash("PIN rimosso: basta il link per vedere i calendari.")
+        else:
+            pin = request.form.get("pin", "").strip()
+            if not 4 <= len(pin) <= 12:
+                flash("Il PIN deve avere tra 4 e 12 caratteri.", "errore")
+                return redirect(url_for("classe") + "#pin")
+            db.execute("UPDATE classi SET pin_hash = ?, pin_errori = 0, pin_bloccato_fino = NULL "
+                       "WHERE id = ?", (generate_password_hash(pin), c["id"]))
+            flash("PIN impostato: comunicalo ai compagni separatamente dal link.")
+        db.commit()
+        return redirect(url_for("classe") + "#pin")
 
     @app.post("/classe/elimina")
     @login_required
@@ -235,14 +264,16 @@ def classe_da_token(token):
     c = get_db().execute("SELECT * FROM classi WHERE token_invito = ?", (token,)).fetchone()
     if c is None:
         abort(404)
+    richiedi_pin(c)
     return c
 
 
 def materia_da_token(token, materia_id):
+    c = classe_da_token(token)
     m = get_db().execute("""
         SELECT m.*, c.token_invito FROM materie m JOIN classi c ON c.id = m.classe_id
-        WHERE m.id = ? AND c.token_invito = ?
-    """, (materia_id, token)).fetchone()
+        WHERE m.id = ? AND c.id = ?
+    """, (materia_id, c["id"])).fetchone()
     if m is None:
         abort(404)
     return m

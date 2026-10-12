@@ -23,7 +23,8 @@ def post(client, url, **dati):
 
 def rappresentante(app, username="rapp", nomi="Anna\nLuca\nMarco\nSara", numero=""):
     c = nuovo_client(app)
-    post(c, "/registrati", username=username, password="password1", conferma="password1")
+    post(c, "/registrati", username=username, password="password1", conferma="password1",
+         eta="1", privacy="1")
     post(c, "/classe/nuova", nome=f"Classe di {username}", nomi=nomi, numero=numero)
     return c
 
@@ -60,7 +61,8 @@ def test_registrazione_login_logout(app):
 def test_username_duplicato(app):
     rappresentante(app)
     c = nuovo_client(app)
-    r = post(c, "/registrati", username="rapp", password="password1", conferma="password1")
+    r = post(c, "/registrati", username="rapp", password="password1", conferma="password1",
+             eta="1", privacy="1")
     assert "già in uso" in r.get_data(as_text=True)
 
 
@@ -140,7 +142,7 @@ def test_classi_isolate(app):
     assert b.get(url_a).status_code == 404
     assert post(b, f"/materie/{materia_id}/elimina").status_code == 404
     assert b.get(f"{link_invito(b)}/materie/{materia_id}").status_code == 404
-    assert "Anna" not in b.get("/classe").get_data(as_text=True)
+    assert 'value="Anna"' not in b.get("/classe").get_data(as_text=True)
 
 
 def test_validazione_materia(app):
