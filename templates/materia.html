@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ materia.nome }}{% endblock %}
+{% block logo %}{% if admin %}{{ super() }}{% else %}<a href="{{ url_for('pubblica', token=materia.token_invito) }}" class="logo">📚 Interrogazioni</a>{% endif %}{% endblock %}
+{% block content %}
+{% set indietro = url_for('classe') if admin else url_for('pubblica', token=materia.token_invito) %}
+<p><a href="{{ indietro }}">← Torna alla classe</a></p>
+<h1>{{ materia.nome }}</h1>
+<div class="azioni">
+  {% if admin %}
+  <form method="post" action="{{ url_for('rigenera', materia_id=materia.id) }}"
+        onsubmit="return confirm('Rifare l\'estrazione? Il calendario attuale verrà sostituito.')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn">🎲 Rifai estrazione</button>
+  </form>
+  <a class="btn secondario" href="{{ url_for('esporta_csv', materia_id=materia.id) }}">⬇ Esporta CSV</a>
+  {% else %}
+  <a class="btn secondario" href="{{ url_for('csv_pubblico', token=materia.token_invito, materia_id=materia.id) }}">⬇ Esporta CSV</a>
+  {% endif %}
+  <button class="btn secondario" onclick="window.print()">🖨 Stampa</button>
+  {% if admin %}
+  <form method="post" action="{{ url_for('elimina_materia', materia_id=materia.id) }}"
+        onsubmit="return confirm('Eliminare definitivamente questa materia?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn pericolo">Elimina</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if admin and non_assegnati %}
+  <div class="flash errore">Non ancora assegnati: {{ non_assegnati|map(attribute='nome')|join(', ') }}. Usa "Rifai estrazione" per includerli.</div>
+{% endif %}
+
+<div class="calendario">
+{% for giorno, alunni in calendario %}
+  <section class="giorno {% if giorno < oggi %}passato{% elif giorno == oggi %}oggi{% endif %}">
+    <h2>{{ giorno|data_it }} <span class="badge">{{ alunni|length }}</span></h2>
+    {% if alunni %}
+      <ol>{% for a in alunni %}<li>{{ a }}</li>{% endfor %}</ol>
+    {% else %}
+      <p class="muted">Nessuno</p>
+    {% endif %}
+  </section>
+{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Nuova materia{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('classe') }}">← Torna alla classe</a></p>
+<h1>Nuova materia</h1>
+<form method="post" class="form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Nome della materia
+    <input name="nome" value="{{ form.nome }}" required placeholder="es. Storia">
+  </label>
+
+  <fieldset>
+    <legend>Date delle interrogazioni</legend>
+    <div id="date">
+      {% for d in date_inserite %}
+        <div class="riga-data">
+          <input type="date" name="date" value="{{ d }}">
+          <button type="button" class="rimuovi" title="Rimuovi">✕</button>
+        </div>
+      {% endfor %}
+    </div>
+    <button type="button" id="aggiungi-data" class="btn secondario">+ Aggiungi data</button>
+  </fieldset>
+
+  <p class="muted">Gli alunni della classe ({{ n_alunni }}) verranno distribuiti a sorte sulle date.</p>
+
+  <button type="submit" class="btn">🎲 Genera calendario</button>
+</form>
+
+<script>
+  const contenitore = document.getElementById("date");
+  document.getElementById("aggiungi-data").addEventListener("click", () => {
+    const righe = contenitore.querySelectorAll(".riga-data");
+    const nuova = righe[righe.length - 1].cloneNode(true);
+    const ultima = righe[righe.length - 1].querySelector("input").value;
+    const input = nuova.querySelector("input");
+    input.value = "";
+    if (ultima) {  // proponi il giorno successivo all'ultima data inserita
+      const d = new Date(ultima);
+      d.setUTCDate(d.getUTCDate() + 1);
+      input.value = d.toISOString().slice(0, 10);
+    }
+    contenitore.appendChild(nuova);
+  });
+  contenitore.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("rimuovi")) return;
+    const righe = contenitore.querySelectorAll(".riga-data");
+    if (righe.length > 1) e.target.parentElement.remove();
+    else righe[0].querySelector("input").value = "";
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Interrogazioni programmate{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    {% block logo %}<a href="{{ url_for('index') }}" class="logo">📚 Interrogazioni</a>{% endblock %}
+    <nav>
+      {% if g.utente %}
+        <a href="{{ url_for('auth.account') }}" class="muted" title="Il tuo account">👤 {{ g.utente.username }}</a>
+        <form method="post" action="{{ url_for('auth.esci') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn secondario">Esci</button>
+        </form>
+      {% elif not pubblica %}
+        <a href="{{ url_for('auth.accedi') }}" class="btn secondario">Accedi</a>
+        <a href="{{ url_for('auth.registrati') }}" class="btn">Registrati</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main>
+    {% for categoria, msg in get_flashed_messages(with_categories=true) %}
+      <div class="flash {{ categoria }}">{{ msg }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer><a href="{{ url_for('privacy.informativa') }}">Informativa privacy</a></footer>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

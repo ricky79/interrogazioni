@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}{{ classe.nome }}{% endblock %}
+{% block content %}
+<h1>{{ classe.nome }}</h1>
+<p class="muted">🗓 I dati di questa classe verranno cancellati automaticamente il {{ classe.scade_il|data_it }}.</p>
+
+<section class="box">
+  <h2>🔗 Link di invito per i compagni</h2>
+  <p class="muted">Chi ha questo link vede i calendari in sola lettura, senza registrarsi.</p>
+  <div class="invito">
+    <input id="link" value="{{ link_invito }}" readonly>
+    <button type="button" class="btn" onclick="navigator.clipboard.writeText(document.getElementById('link').value); this.textContent='Copiato!'">Copia</button>
+  </div>
+  <div class="azioni">
+    <a class="btn secondario" href="{{ link_invito }}" target="_blank">Vedi come i compagni</a>
+    <form method="post" action="{{ url_for('rigenera_invito') }}"
+          onsubmit="return confirm('Il link attuale smetterà di funzionare. Continuare?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn secondario">Genera nuovo link</button>
+    </form>
+  </div>
+</section>
+
+<section class="box" id="pin">
+  <h2>🔑 PIN della classe {% if classe.pin_hash %}<span class="badge">attivo</span>{% endif %}</h2>
+  <p class="muted">Facoltativo. Se lo imposti, chi apre il link deve inserire anche il PIN: un link inoltrato per sbaglio da solo non basta. Comunica il PIN separatamente (es. a voce in classe).</p>
+  <form method="post" action="{{ url_for('imposta_pin') }}" class="invito">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="pin" minlength="4" maxlength="12" autocomplete="off"
+           placeholder="{{ 'Nuovo PIN' if classe.pin_hash else 'Scegli un PIN (4-12 caratteri)' }}" aria-label="PIN">
+    <button class="btn">{{ "Cambia PIN" if classe.pin_hash else "Imposta PIN" }}</button>
+  </form>
+  {% if classe.pin_hash %}
+  <form method="post" action="{{ url_for('imposta_pin') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="rimuovi" value="1">
+    <button class="btn secondario">Rimuovi PIN</button>
+  </form>
+  {% endif %}
+</section>
+
+<div class="titolo-sezione">
+  <h2>Materie</h2>
+  <a class="btn" href="{{ url_for('nuova_materia') }}">+ Nuova materia</a>
+</div>
+{% if materie %}
+  <div class="griglia">
+  {% for m in materie %}
+    <a class="card" href="{{ url_for('materia', materia_id=m.id) }}">
+      <h3>{{ m.nome }}</h3>
+      <p>{{ m.n_date }} date</p>
+      {% if m.prima %}<p class="muted">dal {{ m.prima|data_it }}<br>al {{ m.ultima|data_it }}</p>{% endif %}
+    </a>
+  {% endfor %}
+  </div>
+{% else %}
+  <p class="muted">Nessuna materia ancora.</p>
+{% endif %}
+
+<section class="box" id="alunni">
+  <h2>👥 Alunni ({{ alunni|length }})</h2>
+  <form method="post" action="{{ url_for('modifica_alunni') }}" class="form largo">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="elenco-alunni">
+      {% for a in alunni %}
+        <div class="riga-alunno">
+          <span class="muted">{{ loop.index }}.</span>
+          <input name="nome_{{ a.id }}" value="{{ a.nome }}" maxlength="80" aria-label="Nome alunno {{ loop.index }}">
+          <label class="elimina" title="Rimuovi alunno"><input type="checkbox" name="elimina" value="{{ a.id }}"> rimuovi</label>
+        </div>
+      {% endfor %}
+    </div>
+    <label>Aggiungi alunni (uno per riga, consigliato nome e iniziale: "Anna B.")
+      <textarea name="nomi" rows="3"></textarea>
+    </label>
+    <button type="button" class="btn secondario abbrevia" data-target="nomi">Abbrevia i cognomi di tutti</button>
+    <p class="muted">I nomi modificati si aggiornano subito in tutti i calendari. Chi viene aggiunto entra in una materia solo dopo "Rifai estrazione".</p>
+    <button class="btn">Salva alunni</button>
+  </form>
+</section>
+
+<section class="box pericolo-box">
+  <h2>Zona pericolosa</h2>
+  <form method="post" action="{{ url_for('elimina_classe') }}"
+        onsubmit="return confirm('Eliminare la classe con tutti gli alunni, le materie e i calendari?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn pericolo">Elimina classe</button>
+  </form>
+  <p class="muted">Per cancellare anche il tuo account vai alla pagina <a href="{{ url_for('auth.account') }}">Account</a>.</p>
+</section>
+{% endblock %}

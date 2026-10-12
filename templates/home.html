@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Interrogazioni programmate, senza discussioni</h1>
+  <p>Il rappresentante crea la classe, inserisce i compagni e le date: il sistema estrae a sorte chi viene interrogato e quando, in modo equilibrato.</p>
+  <p>I compagni consultano il calendario con il link di invito, senza bisogno di registrarsi.</p>
+  <p><a class="btn" href="{{ url_for('auth.registrati') }}">Sono il rappresentante: crea la classe</a></p>
+</section>
+{% endblock %}

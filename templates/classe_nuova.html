@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Nuova classe{% endblock %}
+{% block content %}
+<h1>Crea la tua classe</h1>
+<form method="post" class="form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Nome della classe
+    <input name="nome" value="{{ form.nome }}" required placeholder="es. 4ªB Liceo Scientifico">
+  </label>
+  <fieldset>
+    <legend>Alunni</legend>
+    <p class="suggerimento">🔒 Per la privacy usa <strong>nome e iniziale del cognome</strong> (es. "Anna B."): bastano a riconoscersi.</p>
+    <label>Nomi, uno per riga
+      <textarea name="nomi" rows="12" placeholder="Anna B.&#10;Luca R.&#10;...">{{ form.nomi }}</textarea>
+    </label>
+    <button type="button" class="btn secondario abbrevia" data-target="nomi">Abbrevia i cognomi (Anna Bianchi → Anna B.)</button>
+    <label>…oppure solo il numero di alunni (potrai inserire i nomi in seguito)
+      <input type="number" name="numero" min="1" max="200" value="{{ form.numero }}" placeholder="es. 24">
+    </label>
+  </fieldset>
+  <button class="btn">Crea classe</button>
+</form>
+{% endblock %}

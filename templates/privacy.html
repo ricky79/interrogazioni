@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Informativa privacy{% endblock %}
+{% block content %}
+<article class="testo">
+<h1>Informativa privacy</h1>
+<p class="muted">Ai sensi degli artt. 13 e 14 del Regolamento (UE) 2016/679 (GDPR).</p>
+
+<h2>Chi tratta i dati</h2>
+<p>Titolare del trattamento: <strong>{{ titolare }}</strong> – contatto: <strong>{{ contatto }}</strong>.</p>
+<p>Il servizio è un'iniziativa indipendente e <strong>non è gestito dalla scuola</strong>.</p>
+
+<h2>Quali dati trattiamo</h2>
+<ul>
+  <li><strong>Rappresentante di classe:</strong> nome utente, password (salvata solo in forma cifrata con hash), data di accettazione dell'informativa e data dell'ultimo accesso.</li>
+  <li><strong>Alunni della classe:</strong> il nome inserito dal rappresentante (consigliato nome e iniziale del cognome) e le date di interrogazione estratte a sorte.</li>
+  <li><strong>Dati tecnici:</strong> un cookie tecnico di sessione, necessario per il login e per ricordare il PIN della classe. Non usiamo cookie di profilazione, statistiche o pubblicità.</li>
+</ul>
+<p>Non vengono raccolti voti, valutazioni, email, numeri di telefono o altri dati.</p>
+
+<h2>Perché e su quale base</h2>
+<p>I dati servono solo a organizzare il calendario delle interrogazioni programmate della classe e a mostrarlo ai compagni.
+Base giuridica: il consenso del rappresentante, che si registra e accetta questa informativa (art. 6.1.a GDPR), e il legittimo interesse
+della classe a organizzare le interrogazioni (art. 6.1.f GDPR) per i nomi degli alunni.
+Il rappresentante si impegna a inserire solo compagni che sono d'accordo e a usare il minimo di dati necessario.</p>
+
+<h2>Chi può vedere i dati</h2>
+<p>Il rappresentante, e chi riceve da lui il link di invito (e, se impostato, il PIN). Le pagine della classe non sono indicizzate dai motori di ricerca.
+I dati sono conservati presso: {{ hosting }}. Non vengono ceduti né venduti a nessuno.</p>
+
+<h2>Per quanto tempo</h2>
+<ul>
+  <li>I dati di ogni classe vengono <strong>cancellati automaticamente il 31 agosto</strong> al termine dell'anno scolastico.</li>
+  <li>Gli account non utilizzati da oltre un anno vengono cancellati automaticamente.</li>
+  <li>Il rappresentante può cancellare in qualsiasi momento alunni, materie, la classe o l'intero account.</li>
+</ul>
+
+<h2>Età minima</h2>
+<p>Per registrarsi come rappresentante è necessario avere almeno 14 anni (art. 2-quinquies del Codice privacy).</p>
+
+<h2>I tuoi diritti</h2>
+<p>Puoi chiedere accesso, rettifica, cancellazione o limitazione dei tuoi dati, e opporti al trattamento, scrivendo a {{ contatto }}.
+Se il tuo nome compare in una classe, puoi rivolgerti anche direttamente al tuo rappresentante, che può modificarlo o rimuoverlo.
+Hai inoltre il diritto di presentare reclamo al Garante per la protezione dei dati personali (<a href="https://www.garanteprivacy.it">garanteprivacy.it</a>).</p>
+</article>
+{% endblock %}
