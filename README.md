@@ -4,6 +4,8 @@ Web application per gestire le **interrogazioni programmate** di una classe: il
 rappresentante configura alunni, materie e date e il sistema distribuisce a sorte
 gli alunni sulle date in modo equilibrato.
 
+**Online:** https://interrogazioni.eu.pythonanywhere.com
+
 ## Funzionalità
 
 - **Account da rappresentante** (nome utente + password): ogni rappresentante crea
