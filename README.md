@@ -75,3 +75,7 @@ a mano con `flask --app app pulizia`.
 | `privacy.py` | PIN, intestazioni anti-indicizzazione, cancellazione automatica, informativa |
 | `db.py` | schema e connessione SQLite |
 | `templates/`, `static/` | interfaccia HTML/CSS |
+
+## Licenza
+
+[MIT](LICENSE)
